@@ -39,20 +39,73 @@ class solution {
                     cands[i][j].insert(board[i][j]);
             }
         }
-        printSudoku(cands);
-        auto before = cands;
-        auto after = update(before);
-        printSudoku(after);
-        while (!equal(after, before)) {
-            printSudoku(after);
-            before = after;
-            after = update(before);
+        // printSudoku(cands);
+        // auto before = cands;
+        // auto after = update(before);
+        // printSudoku(after);
+        // while (!equal(after, before)) {
+        //     printSudoku(after);
+        //     before = after;
+        //     after = update(before);
+        // }
+        auto result = solve(cands);
+        // int i = 1;
+        for (auto temp : result) {
+            // std::cout << "solution " << i << ":\n";
+            printSudoku(temp);
+            std::cout << std::endl;
         }
     }
 
   private:
+    vector<vector<vector<unordered_set<char>>>> solve(const vector<vector<unordered_set<char>>> & board) {
+        vector<vector<vector<unordered_set<char>>>> result;
+        
+        auto before = board;
+        auto after = update(before);
+        while (!equal(after, before)) {
+            before = after;
+            after = update(before);
+        }
+        if (isComplete(after)) {
+            result.push_back(after);
+            return result;
+        }
+        
+        for (size_t i = 0; i < after.size(); i++) {
+            for (size_t j = 0; j < after[0].size(); j++) {
+                if (after[i][j].empty())
+                    return result;
+            }
+        }
+
+        auto idx = std::make_pair(-1,-1);
+        for (size_t i = 0; i < after.size(); i++) {
+            if (idx.first == -1 && idx.second == -1) {
+                for (size_t j = 0; j < after[0].size(); j++) {
+                    if (after[i][j].size() == 2) {
+                        idx = std::make_pair(i,j);
+                        break;
+                    }
+                }
+            }
+            else
+                break;
+        }
+
+        for (auto it = after[idx.first][idx.second].begin(); it != after[idx.first][idx.second].end(); ++it) {
+            auto cpy = after;
+            cpy[idx.first][idx.second].clear();
+            cpy[idx.first][idx.second].insert(*it);
+            auto temp = solve(cpy);
+            for (auto tmp : temp) {
+                result.push_back(tmp);
+            }
+        }
+        return result;
+    }    
+    
     void printSudoku(const vector<vector<unordered_set<char>>> & cands) {
-        std::cout << std::endl;
         for (size_t i = 0; i < cands.size(); i++) {
             for (size_t j = 0; j < cands[i].size(); j++) {
                 if (cands[i][j].size() == 1)
@@ -104,19 +157,51 @@ class solution {
         }
         return true;
     }
+
+    bool isComplete(const vector<vector<unordered_set<char>>> & board) {
+        for (size_t i = 0; i < board.size(); i++)
+            for (size_t j = 0; j < board[0].size(); j++)
+                if (board[i][j].size() != 1)
+                    return false;
+        return true;
+    }
 };
 
 int main() {
+    // vector<std::string> board{
+    //     {"53..7...."},
+    //     {"6..195..."},
+    //     {".98....6."},
+    //     {"8...6...3"},
+    //     {"4..8.3..1"},
+    //     {"7...2...6"},
+    //     {".6....28."},
+    //     {"...419..5"},
+    //     {"....8..79"}
+    // };
+
+    // vector<std::string> board{
+    //     {"....8.7.."},
+    //     {".7..1.86."},
+    //     {"..94....5"},
+    //     {"5....4.27"},
+    //     {".2.....9."},
+    //     {"79.2....8"},
+    //     {"9....53.."},
+    //     {".62.3..1."},
+    //     {"..5.4...."}
+    // };
+
     vector<std::string> board{
-        {"53..7...."},
-        {"6..195..."},
-        {".98....6."},
-        {"8...6...3"},
-        {"4..8.3..1"},
-        {"7...2...6"},
-        {".6....28."},
-        {"...419..5"},
-        {"....8..79"}
+        {"....6..4."},
+        {"4.27..6.."},
+        {"1...9...7"},
+        {"...6...81"},
+        {"8.......5"},
+        {"95...7..."},
+        {"3...2...9"},
+        {"..9..14.3"},
+        {".7..8...."}
     };
 
     solution soln;
